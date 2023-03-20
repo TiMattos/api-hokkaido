@@ -23,7 +23,7 @@ type Servico struct {
 	Observacao string `json:"observacao"`
 	ValorMO    string `json:"valorMO"`
 	ValorPecas string `json:"valorPecas"`
-	IDCliente  int    `json:"idCliente"`
+	ClienteID  int    `gorm:"foreignKey:IDCliente"`
 }
 
 type Veiculo struct {
@@ -32,5 +32,5 @@ type Veiculo struct {
 	Modelo    string `json:"modelo"`
 	Placa     string `json:"placa"`
 	Ano       string `json:"ano"`
-	ClienteID int    `json:"idCliente" gorm:"foreignKey:IDCliente"`
+	ClienteID int    `gorm:"foreignKey:IDCliente"`
 }
