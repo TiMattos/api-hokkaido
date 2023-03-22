@@ -45,3 +45,28 @@ func ListarCarrosPorID(c *gin.Context) {
 	}
 	c.JSON(200, veiculos)
 }
+
+func BuscarClientePorID(c *gin.Context) {
+	var cliente models.Cliente
+	id := c.Params.ByName("id")
+	database.DB.First(&cliente, id)
+	if cliente.ID == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"Not Found": "Cliente não localizado"})
+		return
+	}
+	c.JSON(200, cliente)
+}
+
+func BuscarClientePorNome(c *gin.Context) {
+	var cliente models.Cliente
+	nome := c.Params.ByName("nome")
+	database.DB.Where("nome = ?", nome).Find(&cliente)
+	//database.DB.First(&cliente, nome)
+	if cliente.ID == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"Not Found": "Cliente não localizado"})
+		return
+	}
+	c.JSON(200, cliente)
+}
