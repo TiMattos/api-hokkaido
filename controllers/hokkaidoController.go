@@ -5,6 +5,7 @@ import (
 
 	"github.com/TiMattos/go-hokkaido/database"
 	"github.com/TiMattos/go-hokkaido/models"
+	"github.com/TiMattos/go-hokkaido/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -53,6 +54,7 @@ func BuscarClientePorID(c *gin.Context) {
 	if cliente.ID == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
 			"Not Found": "Cliente não localizado"})
+		logger.GravarLog("Cliente não localizado")
 		return
 	}
 	c.JSON(200, cliente)
@@ -66,6 +68,7 @@ func BuscarClientePorNome(c *gin.Context) {
 	if cliente.ID == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
 			"Not Found": "Cliente não localizado"})
+		logger.GravarLog("Cliente não localizado")
 		return
 	}
 	c.JSON(200, cliente)
