@@ -42,6 +42,7 @@ func ListarCarrosPorID(c *gin.Context) {
 	if len(veiculos) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
 			"Not Found": "Nehum veiculo localizado"})
+		logger.GravarLog("Nehum veiculo localizado")
 		return
 	}
 	c.JSON(200, veiculos)
@@ -72,4 +73,18 @@ func BuscarClientePorNome(c *gin.Context) {
 		return
 	}
 	c.JSON(200, cliente)
+}
+
+func BuscarVeiculoPorPlaca(c *gin.Context) {
+	var veiculos []models.Veiculo
+	placa := c.Params.ByName("placa")
+	database.DB.First(&veiculos, placa)
+	if len(veiculos) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"Not Found": "Nehum veiculo localizado"})
+		logger.GravarLog("Nehum veiculo localizado")
+		return
+	}
+	c.JSON(200, veiculos)
+
 }
