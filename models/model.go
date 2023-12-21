@@ -15,6 +15,7 @@ type Cliente struct {
 	Bairro      string    `json:"bairro"`
 	Veiculo     []Veiculo `json:"veiculo"`
 	IDCliente   int
+	Cep         string `json:"cep"`
 }
 
 type Servico struct {
