@@ -14,6 +14,7 @@ func HandleRequests() {
 	r.POST("/clientes", controllers.IncluirCliente)
 	r.GET("/cliente/:id", controllers.BuscarClientePorID)
 	r.GET("/cliente/nome/:nome", controllers.BuscarClientePorNome)
+	r.GET("/cliente/find/:nome", controllers.BuscarClienteEVeiculosPorNome)
 	r.Run()
 
 }
