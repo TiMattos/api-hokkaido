@@ -89,32 +89,9 @@ func BuscarVeiculoPorPlaca(c *gin.Context) {
 
 }
 
-func BuscarClientePorNomeEVeiculos(c *gin.Context) {
-	var clientes []models.Cliente
-	nome := c.Params.ByName("nome")
-
-	if nome == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"Erro": "O parâmetro 'nome' é obrigatório",
-		})
-		return
-	}
-
-	database.DB.Where("nome LIKE ?", "%"+nome+"%").Find(&clientes)
-
-	if len(clientes) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"Not Found": "Nenhum cliente localizado com o nome fornecido",
-		})
-		logger.GravarLog("Nenhum cliente localizado com o nome fornecido")
-		return
-	}
-	c.JSON(http.StatusOK, clientes)
-}
-
 func BuscarClienteEVeiculosPorNome(c *gin.Context) {
-	var clientes models.Cliente
-	var veiculos []models.Veiculo
+	var clientes []models.Cliente
+	//var veiculos []models.Veiculo
 	nome := c.Params.ByName("nome")
 
 	if nome == "" {
@@ -125,20 +102,11 @@ func BuscarClienteEVeiculosPorNome(c *gin.Context) {
 	}
 	database.DB.Where("nome LIKE ?", "%"+nome+"%").Find(&clientes)
 
-	clienteID, exists := c.Get("ID")
-
-	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "ID do cliente não encontrado no contexto",
-		})
-		return
+	for i := range clientes {
+		clientes[i].Veiculo = ListVeiculos(c, clientes[i].ID)
 	}
 
-	database.DB.Preload("Veiculos").Where("cliente_id =  ?", clienteID).First(&veiculos)
-	// Consulta que inclui a tabela de veículos relacionada ao cliente
-	//database.DB.Preload("Veiculos").Where("id =  ?", "%"+nome+"%").First(&clientes)
-
-	if clientes.ID == 0 {
+	if len(clientes) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Nenhum cliente localizado com o nome fornecido",
 		})
@@ -146,8 +114,11 @@ func BuscarClienteEVeiculosPorNome(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"cliente":  clientes,
-		"veiculos": clientes.Veiculo, // Acessa os veículos associados ao cliente
-	})
+	c.JSON(http.StatusOK, clientes)
+}
+
+func ListVeiculos(c *gin.Context, id int) []models.Veiculo {
+	var veiculos []models.Veiculo
+	database.DB.Where("cliente_id = ?", id).Find(&veiculos)
+	return veiculos
 }

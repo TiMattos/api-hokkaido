@@ -14,8 +14,8 @@ type Cliente struct {
 	Numero      string    `json:"numero"`
 	Bairro      string    `json:"bairro"`
 	Veiculo     []Veiculo `json:"veiculo"`
-	IDCliente   int
-	Cep         string `json:"cep"`
+	Cep         string    `json:"cep"`
+	ID          int       `gorm:"primaryKey"`
 }
 
 type Servico struct {
@@ -24,7 +24,7 @@ type Servico struct {
 	Observacao string `json:"observacao"`
 	ValorMO    string `json:"valorMO"`
 	ValorPecas string `json:"valorPecas"`
-	ClienteID  int    `gorm:"foreignKey:IDCliente"`
+	ClienteID  int    `gorm:"foreignKey:ID"`
 }
 
 type Veiculo struct {
@@ -33,5 +33,5 @@ type Veiculo struct {
 	Modelo    string `json:"modelo"`
 	Placa     string `json:"placa"`
 	Ano       string `json:"ano"`
-	ClienteID int    `gorm:"foreignKey:IDCliente"`
+	ClienteID int    `gorm:"foreignKey:ID"`
 }
