@@ -1,21 +1,24 @@
 package models
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
 type Cliente struct {
 	gorm.Model
-	Nome        string    `json:"nome"`
-	Email       string    `json:"email"`
-	Telefone    string    `json:"telefone"`
-	Endereco    string    `json:"endereco"`
-	Complemento string    `json:"complemento"`
-	Numero      string    `json:"numero"`
-	Bairro      string    `json:"bairro"`
-	Veiculo     []Veiculo `json:"veiculo"`
-	Cep         string    `json:"cep"`
-	ID          int       `gorm:"primaryKey"`
+	Nome           string    `json:"nome"`
+	Email          string    `json:"email"`
+	Telefone       string    `json:"telefone"`
+	Endereco       string    `json:"endereco"`
+	Complemento    string    `json:"complemento"`
+	Numero         string    `json:"numero"`
+	Bairro         string    `json:"bairro"`
+	Veiculo        []Veiculo `json:"veiculo"`
+	Cep            string    `json:"cep"`
+	DataNascimento time.Time `json:"data_nascimento"`
+	ID             int       `gorm:"primaryKey"`
 }
 
 type Servico struct {
