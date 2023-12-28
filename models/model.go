@@ -1,8 +1,6 @@
 package models
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 )
 
@@ -17,7 +15,7 @@ type Cliente struct {
 	Bairro         string    `json:"bairro"`
 	Veiculo        []Veiculo `json:"veiculo"`
 	Cep            string    `json:"cep"`
-	DataNascimento time.Time `json:"data_nascimento"`
+	DataNascimento string    `json:"dataNascimento"`
 	ID             int       `gorm:"primaryKey"`
 }
 
