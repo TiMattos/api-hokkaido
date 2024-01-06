@@ -14,7 +14,7 @@ type Cliente struct {
 	Numero         string    `json:"numero"`
 	Bairro         string    `json:"bairro"`
 	Veiculo        []Veiculo `json:"veiculo"`
-	Cep            string    `json:"cep"`
+	Cep            string    `json:"numeroCep"`
 	DataNascimento string    `json:"dataNascimento"`
 	ID             int       `gorm:"primaryKey"`
 }
