@@ -11,7 +11,7 @@ type Cliente struct {
 	Telefone       string    `json:"telefone"`
 	Endereco       string    `json:"endereco"`
 	Complemento    string    `json:"complemento"`
-	Numero         string    `json:"numero"`
+	Cidade         string    `json:"cidade"`
 	Bairro         string    `json:"bairro"`
 	Veiculo        []Veiculo `json:"veiculo"`
 	Cep            string    `json:"numeroCep"`
