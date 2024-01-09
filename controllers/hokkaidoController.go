@@ -76,17 +76,24 @@ func BuscarClientePorNome(c *gin.Context) {
 }
 
 func BuscarVeiculoPorPlaca(c *gin.Context) {
-	var veiculos []models.Veiculo
+	var veiculo models.Veiculo
 	placa := c.Params.ByName("placa")
-	database.DB.First(&veiculos, placa)
-	if len(veiculos) == 0 {
+
+	// Usar um mapa para as condições da consulta
+	condicoes := map[string]interface{}{"placa": placa}
+
+	// Alterar a consulta para usar o mapa de condições
+	database.DB.Where(condicoes).First(&veiculo)
+
+	if veiculo.ID == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
-			"Not Found": "Nehum veiculo localizado"})
-		logger.GravarLog("Nehum veiculo localizado")
+			"Not Found": "Nenhum veiculo localizado",
+		})
+		logger.GravarLog("Nenhum veiculo localizado")
 		return
 	}
-	c.JSON(200, veiculos)
 
+	c.JSON(http.StatusOK, veiculo)
 }
 
 func BuscarClienteEVeiculosPorNome(c *gin.Context) {
