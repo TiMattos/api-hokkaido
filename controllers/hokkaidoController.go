@@ -9,13 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Saudacao(c *gin.Context) {
-	nome := c.Params.ByName("nome")
-	c.JSON(200, gin.H{
-		"API diz:": "E ai " + nome + " tudo beleza?",
-	})
-}
-
 func IncluirCliente(c *gin.Context) {
 	var cliente models.Cliente
 	// o ShouldBind transforma a requisição na model
@@ -128,4 +121,25 @@ func ListVeiculos(c *gin.Context, id int) []models.Veiculo {
 	var veiculos []models.Veiculo
 	database.DB.Where("cliente_id = ?", id).Find(&veiculos)
 	return veiculos
+}
+
+func HealthCheck(c *gin.Context) {
+	db, err := database.DB.DB()
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"error": "Erro ao obter o objeto de banco de dados",
+		})
+		return
+	}
+
+	if err := db.Ping(); err != nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"error": "Falha na conexão com o banco de dados",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "OK",
+	})
 }
