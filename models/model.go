@@ -17,6 +17,7 @@ type Cliente struct {
 	Cep            string    `json:"numeroCep"`
 	DataNascimento string    `json:"dataNascimento"`
 	ID             int       `gorm:"primaryKey"`
+	Cpf            string    `json:"cpf"`
 }
 
 type Servico struct {

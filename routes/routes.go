@@ -7,7 +7,6 @@ import (
 
 func HandleRequests() {
 	r := gin.Default()
-	r.GET("/:nome", controllers.Saudacao)
 	r.GET("/clientes", controllers.ListarClientes)
 	r.GET("/veiculos/id/:id", controllers.ListarCarrosPorID)
 	r.GET("/veiculos/:placa", controllers.BuscarVeiculoPorPlaca)
@@ -15,6 +14,7 @@ func HandleRequests() {
 	r.GET("/cliente/:id", controllers.BuscarClientePorID)
 	r.GET("/cliente/nome/:nome", controllers.BuscarClientePorNome)
 	r.GET("/cliente/find/:nome", controllers.BuscarClienteEVeiculosPorNome)
+	r.GET("/health", controllers.HealthCheck)
 	r.Run()
 
 }
