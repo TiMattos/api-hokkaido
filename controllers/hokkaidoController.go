@@ -21,6 +21,17 @@ func IncluirCliente(c *gin.Context) {
 	c.JSON(http.StatusOK, cliente)
 }
 
+func IncluirVeiculo(c *gin.Context) {
+	var veiculo models.Veiculo
+	if err := c.ShouldBindJSON(&veiculo); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error()})
+		return
+	}
+	database.DB.Create(&veiculo)
+	c.JSON(http.StatusOK, veiculo)
+}
+
 func ListarClientes(c *gin.Context) {
 	var clientes []models.Cliente
 	database.DB.Find(&clientes)
