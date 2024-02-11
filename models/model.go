@@ -26,7 +26,10 @@ type Servico struct {
 	Observacao string `json:"observacao"`
 	ValorMO    string `json:"valorMO"`
 	ValorPecas string `json:"valorPecas"`
+	KmAtual    string `json:"kmAtual"`
+	KmRevisao  string `json:"kmRevisao"`
 	ClienteID  int    `gorm:"foreignKey:ID"`
+	VeiculoID  int    `gorm:"foreignKey:ID"`
 }
 
 type Veiculo struct {
@@ -36,4 +39,5 @@ type Veiculo struct {
 	Placa     string `json:"placa"`
 	Ano       string `json:"ano"`
 	ClienteID int    `gorm:"foreignKey:ID"`
+	ID        int    `gorm:"primaryKey"`
 }
