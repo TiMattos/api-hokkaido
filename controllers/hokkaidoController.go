@@ -34,6 +34,7 @@ func IncluirVeiculo(c *gin.Context) {
 
 func IncluirServico(c *gin.Context) {
 	var servico models.Servico
+
 	if err := c.ShouldBindJSON(&servico); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error()})
@@ -164,4 +165,23 @@ func HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status": "OK",
 	})
+}
+
+func ListarServicosPorIdCliente(c *gin.Context, id int) {
+	var servicos []models.ServicoResponse
+	database.DB.Where("cliente_id = ?", id).Find(&servicos)
+	c.JSON(200, servicos)
+}
+
+func BuscaServicoPorID(c *gin.Context) {
+	var servico models.ServicoResponse
+	id := c.Params.ByName("id")
+	database.DB.First(&servico, id)
+	if servico.ID == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"Not Found": "Serviço não localizado"})
+		logger.GravarLog("Serviço não localizado")
+		return
+	}
+	c.JSON(200, servico)
 }

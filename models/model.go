@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -30,6 +32,21 @@ type Servico struct {
 	KmRevisao  string `json:"kmRevisao"`
 	ClienteID  int    `gorm:"foreignKey:ID"`
 	VeiculoID  int    `gorm:"foreignKey:ID"`
+}
+
+type ServicoResponse struct {
+	ID         uint       `json:"id"`
+	CreatedAt  time.Time  `json:"created_at"`
+	UpdatedAt  time.Time  `json:"updated_at"`
+	DeletedAt  *time.Time `json:"deleted_at,omitempty"`
+	Descricao  string     `json:"descricao"`
+	Observacao string     `json:"observacao"`
+	ValorMO    string     `json:"valorMO"`
+	ValorPecas string     `json:"valorPecas"`
+	KmAtual    string     `json:"kmAtual"`
+	KmRevisao  string     `json:"kmRevisao"`
+	ClienteID  int        `json:"cliente_id"`
+	VeiculoID  int        `json:"veiculo_id"`
 }
 
 type Veiculo struct {
