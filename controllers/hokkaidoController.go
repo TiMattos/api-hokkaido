@@ -167,14 +167,15 @@ func HealthCheck(c *gin.Context) {
 	})
 }
 
-func ListarServicosPorIdCliente(c *gin.Context, id int) {
-	var servicos []models.ServicoResponse
+func ListarServicosPorIdCliente(c *gin.Context) {
+	var servicos []models.Servico
+	id := c.Params.ByName("id")
 	database.DB.Where("cliente_id = ?", id).Find(&servicos)
 	c.JSON(200, servicos)
 }
 
 func BuscaServicoPorID(c *gin.Context) {
-	var servico models.ServicoResponse
+	var servico models.Servico
 	id := c.Params.ByName("id")
 	database.DB.First(&servico, id)
 	if servico.ID == 0 {

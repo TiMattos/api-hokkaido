@@ -32,6 +32,7 @@ type Servico struct {
 	KmRevisao  string `json:"kmRevisao"`
 	ClienteID  int    `gorm:"foreignKey:ID"`
 	VeiculoID  int    `gorm:"foreignKey:ID"`
+	ID         int    `gorm:"primaryKey"`
 }
 
 type ServicoResponse struct {
