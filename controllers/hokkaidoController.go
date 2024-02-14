@@ -1,13 +1,126 @@
 package controllers
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
+	"fmt"
+	"io"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/TiMattos/go-hokkaido/database"
 	"github.com/TiMattos/go-hokkaido/models"
 	"github.com/TiMattos/go-hokkaido/pkg/logger"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
+
+var secretKey []byte
+
+func generateSecretKeyFromPassword(password string, length int) (string, error) {
+	// Use SHA-256 para derivar a chave secreta
+	hash := sha256.New()
+	io.WriteString(hash, password)
+	derivedKey := hash.Sum(nil)
+
+	// Codifique os bytes derivados em uma string base64
+	secretKey := base64.URLEncoding.EncodeToString(derivedKey[:length])
+	return secretKey, nil
+}
+
+func init() {
+	// Defina a senha para derivar a chave secreta
+	password := "Hokkaido@2024"
+
+	// Defina o comprimento da chave desejada (em bytes)
+	keyLength := 32 // Recomendado usar pelo menos 32 bytes (256 bits) para uma chave segura
+
+	// Gere a chave secreta a partir da senha
+	derivedKey, err := generateSecretKeyFromPassword(password, keyLength)
+	if err != nil {
+		fmt.Println("Erro ao gerar a chave secreta:", err)
+		return
+	}
+
+	// Atribua a chave secreta derivada à variável global
+	secretKey = []byte(derivedKey)
+
+	fmt.Println("Chave secreta gerada com sucesso:", secretKey)
+}
+
+func LoginHandler(c *gin.Context) {
+	var credentials struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	if err := c.ShouldBindJSON(&credentials); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Credenciais inválidas"})
+		return
+	}
+
+	// Lógica de autenticação - substitua isso com a lógica real
+	// Por exemplo, você pode verificar as credenciais no banco de dados
+	// e gerar um token JWT se as credenciais estiverem corretas.
+	if credentials.Username == "usuario" && credentials.Password == "senha" {
+		token, dateExpiration, err := generateToken()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao gerar token"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"token": token, "expiration": dateExpiration})
+		return
+	}
+
+	c.JSON(http.StatusUnauthorized, gin.H{"error": "Credenciais inválidas"})
+}
+
+func generateToken() (string, time.Time, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	expirationTime := time.Now().Add(time.Hour * 24)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["exp"] = expirationTime.Unix() // Expira em 24 horas
+
+	// Adicione logs para verificar a chave secreta antes de tentar assinar o token
+	fmt.Println("Chave secreta utilizada para assinar o token:", secretKey)
+
+	tokenString, err := token.SignedString(secretKey)
+
+	fmt.Println("token gerado:", err, tokenString)
+
+	if err != nil {
+		return "", time.Time{}, fmt.Errorf("Erro ao assinar o token: %v", err)
+	}
+
+	return tokenString, expirationTime, nil
+}
+
+func Authenticate(c *gin.Context) {
+	tokenString := c.GetHeader("Authorization")
+	fmt.Println("tokenString", tokenString)
+	if tokenString == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token de autenticação ausente"})
+		c.Abort()
+		return
+	}
+
+	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+	// Parse do token com a mesma chave usada para assiná-lo
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	fmt.Println("token", token, "err", err)
+
+	if err != nil || !token.Valid {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token de autenticação inválido"})
+		c.Abort()
+		return
+	}
+}
 
 func IncluirCliente(c *gin.Context) {
 	var cliente models.Cliente
