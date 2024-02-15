@@ -59,3 +59,10 @@ type Veiculo struct {
 	ClienteID int    `gorm:"foreignKey:ID"`
 	ID        int    `gorm:"primaryKey"`
 }
+
+type ApiCredentials struct {
+	gorm.Model
+	User      string `json:"username"`
+	Password  string `json:"password"`
+	SecretKey string `json:"secretKey"`
+}

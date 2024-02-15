@@ -30,14 +30,16 @@ func generateSecretKeyFromPassword(password string, length int) (string, error) 
 }
 
 func init() {
-	// Defina a senha para derivar a chave secreta
-	password := "Hokkaido@2024"
-
-	// Defina o comprimento da chave desejada (em bytes)
-	keyLength := 32 // Recomendado usar pelo menos 32 bytes (256 bits) para uma chave segura
+	// Conecte-se ao banco de dados e obtenha as credenciais da API
+	database.ConectaComBancoDeDados()
+	var apiCredentials models.ApiCredentials
+	if err := database.DB.First(&apiCredentials).Error; err != nil {
+		fmt.Println("Erro ao obter as credenciais do banco de dados:", err)
+		return
+	}
 
 	// Gere a chave secreta a partir da senha
-	derivedKey, err := generateSecretKeyFromPassword(password, keyLength)
+	derivedKey, err := generateSecretKeyFromPassword(apiCredentials.SecretKey, 32)
 	if err != nil {
 		fmt.Println("Erro ao gerar a chave secreta:", err)
 		return
@@ -62,8 +64,11 @@ func LoginHandler(c *gin.Context) {
 
 	// Lógica de autenticação - substitua isso com a lógica real
 	// Por exemplo, você pode verificar as credenciais no banco de dados
+	var apiCredentials models.ApiCredentials
+	database.DB.First(&apiCredentials)
+
 	// e gerar um token JWT se as credenciais estiverem corretas.
-	if credentials.Username == "usuario" && credentials.Password == "senha" {
+	if credentials.Username == apiCredentials.User && credentials.Password == apiCredentials.Password {
 		token, dateExpiration, err := generateToken()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao gerar token"})

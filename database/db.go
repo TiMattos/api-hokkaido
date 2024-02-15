@@ -23,4 +23,5 @@ func ConectaComBancoDeDados() {
 	DB.AutoMigrate(&models.Cliente{})
 	DB.AutoMigrate(&models.Servico{})
 	DB.AutoMigrate(&models.Veiculo{})
+	DB.AutoMigrate(&models.ApiCredentials{})
 }
