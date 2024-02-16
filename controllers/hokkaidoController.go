@@ -19,18 +19,14 @@ import (
 var secretKey []byte
 
 func generateSecretKeyFromPassword(password string, length int) (string, error) {
-	// Use SHA-256 para derivar a chave secreta
 	hash := sha256.New()
 	io.WriteString(hash, password)
 	derivedKey := hash.Sum(nil)
-
-	// Codifique os bytes derivados em uma string base64
 	secretKey := base64.URLEncoding.EncodeToString(derivedKey[:length])
 	return secretKey, nil
 }
 
 func init() {
-	// Conecte-se ao banco de dados e obtenha as credenciais da API
 	database.ConectaComBancoDeDados()
 	var apiCredentials models.ApiCredentials
 	if err := database.DB.First(&apiCredentials).Error; err != nil {
@@ -38,14 +34,12 @@ func init() {
 		return
 	}
 
-	// Gere a chave secreta a partir da senha
 	derivedKey, err := generateSecretKeyFromPassword(apiCredentials.SecretKey, 32)
 	if err != nil {
 		fmt.Println("Erro ao gerar a chave secreta:", err)
 		return
 	}
 
-	// Atribua a chave secreta derivada à variável global
 	secretKey = []byte(derivedKey)
 
 	fmt.Println("Chave secreta gerada com sucesso:", secretKey)
@@ -62,12 +56,9 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	// Lógica de autenticação - substitua isso com a lógica real
-	// Por exemplo, você pode verificar as credenciais no banco de dados
 	var apiCredentials models.ApiCredentials
 	database.DB.First(&apiCredentials)
 
-	// e gerar um token JWT se as credenciais estiverem corretas.
 	if credentials.Username == apiCredentials.User && credentials.Password == apiCredentials.Password {
 		token, dateExpiration, err := generateToken()
 		if err != nil {
@@ -88,7 +79,6 @@ func generateToken() (string, time.Time, error) {
 	claims := token.Claims.(jwt.MapClaims)
 	claims["exp"] = expirationTime.Unix() // Expira em 24 horas
 
-	// Adicione logs para verificar a chave secreta antes de tentar assinar o token
 	fmt.Println("Chave secreta utilizada para assinar o token:", secretKey)
 
 	tokenString, err := token.SignedString(secretKey)
