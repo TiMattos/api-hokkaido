@@ -294,3 +294,22 @@ func BuscaServicoPorID(c *gin.Context) {
 	}
 	c.JSON(200, servico)
 }
+
+func UpdateCliente(c *gin.Context) {
+	var cliente models.Cliente
+	id := c.Params.ByName("id")
+	database.DB.First(&cliente, id)
+	if cliente.ID == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"Not Found": "Cliente não localizado"})
+		logger.GravarLog("Cliente não localizado")
+		return
+	}
+	if err := c.ShouldBindJSON(&cliente); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error()})
+		return
+	}
+	database.DB.Save(&cliente)
+	c.JSON(http.StatusOK, cliente)
+}
