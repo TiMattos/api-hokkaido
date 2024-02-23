@@ -24,15 +24,16 @@ type Cliente struct {
 
 type Servico struct {
 	gorm.Model
-	Descricao  string `json:"descricao"`
-	Observacao string `json:"observacao"`
-	ValorMO    string `json:"valorMO"`
-	ValorPecas string `json:"valorPecas"`
-	KmAtual    string `json:"kmAtual"`
-	KmRevisao  string `json:"kmRevisao"`
-	ClienteID  int    `gorm:"foreignKey:ID"`
-	VeiculoID  int    `gorm:"foreignKey:ID"`
-	ID         int    `gorm:"primaryKey"`
+	Descricao  string    `json:"descricao"`
+	Observacao string    `json:"observacao"`
+	ValorMO    string    `json:"valorMO"`
+	ValorPecas string    `json:"valorPecas"`
+	KmAtual    string    `json:"kmAtual"`
+	KmRevisao  string    `json:"kmRevisao"`
+	ClienteID  int       `gorm:"foreignKey:ID"`
+	VeiculoID  int       `gorm:"foreignKey:ID"`
+	ID         int       `gorm:"primaryKey"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type ServicoResponse struct {
