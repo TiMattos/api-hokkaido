@@ -36,19 +36,15 @@ type Servico struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
-type ServicoResponse struct {
-	ID         uint       `json:"id"`
-	CreatedAt  time.Time  `json:"created_at"`
-	UpdatedAt  time.Time  `json:"updated_at"`
-	DeletedAt  *time.Time `json:"deleted_at,omitempty"`
-	Descricao  string     `json:"descricao"`
-	Observacao string     `json:"observacao"`
-	ValorMO    string     `json:"valorMO"`
-	ValorPecas string     `json:"valorPecas"`
-	KmAtual    string     `json:"kmAtual"`
-	KmRevisao  string     `json:"kmRevisao"`
-	ClienteID  int        `json:"cliente_id"`
-	VeiculoID  int        `json:"veiculo_id"`
+func (s *Servico) BeforeSave(tx *gorm.DB) (err error) {
+	if s.ID == 0 {
+		// Esta é uma inserção, não atualize CreatedAt
+		return
+	}
+
+	// Esta é uma atualização, atualize CreatedAt
+	s.CreatedAt = time.Now()
+	return
 }
 
 type Veiculo struct {
