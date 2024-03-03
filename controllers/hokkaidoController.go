@@ -253,6 +253,7 @@ func BuscarClienteEVeiculosPorNome(c *gin.Context) {
 	var clientes []models.Cliente
 	//var veiculos []models.Veiculo
 	nome := c.Params.ByName("nome")
+	logger.GravarLog("SearchCustomerAndVehiclesByName: Iniciando busca de cliente por nome")
 
 	if nome == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -260,7 +261,15 @@ func BuscarClienteEVeiculosPorNome(c *gin.Context) {
 		})
 		return
 	}
-	database.DB.Where("nome LIKE ?", "%"+nome+"%").Find(&clientes)
+	logger.GravarLog("SearchCustomerAndVehiclesByName: Buscando cliente por nome")
+
+	if err := database.DB.Where("nome LIKE ?", "%"+nome+"%").Find(&clientes).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao buscar cliente",
+		})
+		logger.GravarLog("SearchCustomerAndVehiclesByName: Erro ao buscar cliente")
+		return
+	}
 
 	for i := range clientes {
 		clientes[i].Veiculo = ListVeiculos(c, clientes[i].ID)
@@ -270,34 +279,45 @@ func BuscarClienteEVeiculosPorNome(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Nenhum cliente localizado com o nome fornecido",
 		})
-		logger.GravarLog("Nenhum cliente localizado com o nome fornecido")
+		logger.GravarLog("SearchCustomerAndVehiclesByName: Nenhum cliente localizado com o nome fornecido")
 		return
 	}
-
+	logger.GravarLog("SearchCustomerAndVehiclesByName: Cliente localizado com sucesso")
 	c.JSON(http.StatusOK, clientes)
 }
 
 func ListVeiculos(c *gin.Context, id int) []models.Veiculo {
 	var veiculos []models.Veiculo
-	database.DB.Where("cliente_id = ?", id).Find(&veiculos)
+	logger.GravarLog("ListVehicles: Iniciando busca de veículos por ID do cliente")
+	if err := database.DB.Where("cliente_id = ?", id).Find(&veiculos).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao buscar veículos",
+		})
+		logger.GravarLog("ListVehicles: Erro ao buscar veículos")
+		return nil
+	}
+	logger.GravarLog("ListVehicles: Veículos localizados com sucesso")
 	return veiculos
 }
 
 func HealthCheck(c *gin.Context) {
 	db, err := database.DB.DB()
+	logger.GravarLog("HealthCheck: Iniciando verificação de saúde do banco de dados")
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"error": "Erro ao obter o objeto de banco de dados",
 		})
 		return
 	}
-
+	logger.GravarLog("HealthCheck: Verificando conexão com o banco de dados")
 	if err := db.Ping(); err != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"error": "Falha na conexão com o banco de dados",
 		})
+		logger.GravarLog("HealthCheck: Falha na conexão com o banco de dados")
 		return
 	}
+	logger.GravarLog("HealthCheck: Banco de dados está saudável")
 
 	c.JSON(http.StatusOK, gin.H{
 		"status": "OK",
@@ -306,21 +326,32 @@ func HealthCheck(c *gin.Context) {
 
 func ListarServicosPorIdCliente(c *gin.Context) {
 	var servicos []models.Servico
+	logger.GravarLog("ListServicesByClientId: Iniciando busca de serviços por ID do cliente")
 	id := c.Params.ByName("id")
-	database.DB.Where("cliente_id = ?", id).Find(&servicos)
+	if err := database.DB.Where("cliente_id = ?", id).Find(&servicos).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao buscar serviços",
+		})
+		logger.GravarLog("ListServicesByClientId: Erro ao buscar serviços")
+		return
+	}
+
+	logger.GravarLog("ListServicesByClientId: Serviços localizados com sucesso")
 	c.JSON(200, servicos)
 }
 
 func BuscaServicoPorID(c *gin.Context) {
 	var servico models.Servico
+	logger.GravarLog("SearchServiceById: Iniciando busca de serviço por ID")
 	id := c.Params.ByName("id")
 	database.DB.First(&servico, id)
 	if servico.ID == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
 			"Not Found": "Serviço não localizado"})
-		logger.GravarLog("Serviço não localizado")
+		logger.GravarLog("SearchServiceById: Serviço não localizado")
 		return
 	}
+	logger.GravarLog("SearchServiceById: Serviço localizado com sucesso")
 	c.JSON(200, servico)
 }
 
@@ -346,6 +377,7 @@ func UpdateCliente(c *gin.Context) {
 		})
 		return
 	}
+	logger.GravarLog("UpdateClient: cliente atualizado com sucesso")
 
 	clienteJSON, err := structToJSON(cliente)
 	if err != nil {
@@ -372,11 +404,11 @@ func UpdateCliente(c *gin.Context) {
 }
 
 func InsertLogCliente(c *gin.Context, logCliente models.LogCliente) error {
-
+	logger.GravarLog("InsertLog: Iniciando inserção de log de cliente")
 	if err := database.DB.Create(&logCliente).Error; err != nil {
 		return err
 	}
-
+	logger.GravarLog("InsertLog: log de cliente inserido com sucesso")
 	return nil
 
 }
