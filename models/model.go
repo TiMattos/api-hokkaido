@@ -63,3 +63,19 @@ type ApiCredentials struct {
 	Password  string `json:"password"`
 	SecretKey string `json:"secretKey"`
 }
+
+type LogCliente struct {
+	gorm.Model
+	ClienteID int    `json:"clienteID"`
+	Operacao  string `json:"operacao"`
+	Usuario   string `json:"usuario"`
+	Json      string `json:"json"`
+}
+
+type LogVeiculo struct {
+	gorm.Model
+	VeiculoID int    `json:"veiculoID"`
+	Operacao  string `json:"operacao"`
+	Usuario   string `json:"usuario"`
+	ClienteID int    `json:"clienteID"`
+}

@@ -3,6 +3,7 @@ package controllers
 import (
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -125,7 +126,35 @@ func IncluirCliente(c *gin.Context) {
 			"error": err.Error()})
 		return
 	}
-	database.DB.Create(&cliente)
+	// Inserir cliente no banco de dados
+	if err := database.DB.Create(&cliente).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao inserir cliente",
+		})
+		return
+	}
+
+	clienteJSON, err := structToJSON(cliente)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao converter cliente para JSON",
+		})
+		return
+	}
+
+	log := models.LogCliente{
+		ClienteID: cliente.ID,
+		Operacao:  "Insert",
+		Usuario:   "admin",
+		Json:      clienteJSON,
+	}
+	if err := InsertLogCliente(c, log); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao inserir log de cliente",
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, cliente)
 }
 
@@ -297,6 +326,7 @@ func BuscaServicoPorID(c *gin.Context) {
 
 func UpdateCliente(c *gin.Context) {
 	var cliente models.Cliente
+	logger.GravarLog("UpdateClient: Iniciando atualização de cliente")
 	id := c.Params.ByName("id")
 	database.DB.First(&cliente, id)
 	if cliente.ID == 0 {
@@ -310,6 +340,61 @@ func UpdateCliente(c *gin.Context) {
 			"error": err.Error()})
 		return
 	}
-	database.DB.Save(&cliente)
+	if err := database.DB.Save(&cliente).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao atualizar cliente",
+		})
+		return
+	}
+
+	clienteJSON, err := structToJSON(cliente)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao converter cliente para JSON",
+		})
+		return
+	}
+
+	log := models.LogCliente{
+		ClienteID: cliente.ID,
+		Operacao:  "Update",
+		Usuario:   "admin",
+		Json:      clienteJSON,
+	}
+	if err := InsertLogCliente(c, log); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao inserir log de cliente",
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, cliente)
+}
+
+func InsertLogCliente(c *gin.Context, logCliente models.LogCliente) error {
+
+	if err := database.DB.Create(&logCliente).Error; err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func InsertLogVeiculo(c *gin.Context, logVeiculo models.LogVeiculo) error {
+
+	if err := database.DB.Create(&logVeiculo).Error; err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func structToJSON(obj interface{}) (string, error) {
+	jsonData, err := json.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), nil
 }
