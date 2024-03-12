@@ -5,6 +5,7 @@ go 1.20
 require gorm.io/gorm v1.24.7-0.20230306060331-85eaf9eeda11
 
 require (
+	github.com/badoux/checkmail v1.2.4 // indirect
 	github.com/bytedance/sonic v1.8.5 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect

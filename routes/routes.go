@@ -23,6 +23,7 @@ func HandleRequests() {
 	authGroup.GET("/servico/:id", controllers.BuscaServicoPorID)
 	authGroup.GET("/health", controllers.HealthCheck)
 	authGroup.POST("/cliente/update", controllers.UpdateCliente)
+	authGroup.GET("/cliente/emails", controllers.ListEmailableClients)
 	r.Run()
 
 }

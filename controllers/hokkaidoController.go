@@ -13,6 +13,7 @@ import (
 	"github.com/TiMattos/go-hokkaido/database"
 	"github.com/TiMattos/go-hokkaido/models"
 	"github.com/TiMattos/go-hokkaido/pkg/logger"
+	"github.com/badoux/checkmail"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
@@ -429,4 +430,26 @@ func structToJSON(obj interface{}) (string, error) {
 		return "", err
 	}
 	return string(jsonData), nil
+}
+
+func ListEmailableClients(c *gin.Context) {
+	var clientes []models.Cliente
+	var emails []string
+
+	if err := database.DB.Where("email IS NOT NULL").Find(&clientes).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao buscar clientes",
+		})
+		logger.GravarLog("listEmailableClients: Erro ao listar emails.")
+		return
+	}
+
+	for _, cliente := range clientes {
+		// Validar se o email é válido antes de adicioná-lo à lista
+		if err := checkmail.ValidateFormat(cliente.Email); err == nil {
+			emails = append(emails, cliente.Email)
+		}
+	}
+
+	c.JSON(http.StatusOK, emails)
 }
