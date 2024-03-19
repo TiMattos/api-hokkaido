@@ -453,3 +453,21 @@ func ListEmailableClients(c *gin.Context) {
 
 	c.JSON(http.StatusOK, emails)
 }
+
+func ListDailyServices(c *gin.Context) {
+	var servicos []models.Servico
+	data := c.Param("data")
+
+	logger.GravarLog("ListDailyServices: Iniciando busca de serviços diários")
+	// Construir a consulta SQL para comparar a data truncada com a data no banco de dados
+	if err := database.DB.Where("data_revisao = ?", data).Find(&servicos).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao buscar serviços",
+		})
+		logger.GravarLog("ListDailyServices: Erro ao buscar serviços")
+		return
+	}
+
+	logger.GravarLog("ListDailyServices: Serviços localizados com sucesso")
+	c.JSON(http.StatusOK, servicos)
+}

@@ -24,6 +24,7 @@ func HandleRequests() {
 	authGroup.GET("/health", controllers.HealthCheck)
 	authGroup.POST("/cliente/update", controllers.UpdateCliente)
 	authGroup.GET("/cliente/emails", controllers.ListEmailableClients)
+	authGroup.GET("/servicos/data/:data", controllers.ListDailyServices)
 	r.Run()
 
 }
