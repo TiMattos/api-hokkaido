@@ -456,11 +456,10 @@ func ListEmailableClients(c *gin.Context) {
 
 func ListDailyServices(c *gin.Context) {
 	var servicos []models.Servico
-	data := c.Param("data")
 
 	logger.GravarLog("ListDailyServices: Iniciando busca de serviços diários")
 	// Construir a consulta SQL para comparar a data truncada com a data no banco de dados
-	if err := database.DB.Where("data_revisao = ?", data).Find(&servicos).Error; err != nil {
+	if err := database.DB.Where("DATE_TRUNC('day', created_at) = CURRENT_DATE").Find(&servicos).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Erro ao buscar serviços",
 		})
@@ -469,5 +468,28 @@ func ListDailyServices(c *gin.Context) {
 	}
 
 	logger.GravarLog("ListDailyServices: Serviços localizados com sucesso")
+	c.JSON(http.StatusOK, servicos)
+}
+
+func ListServicesThreeYears(c *gin.Context) {
+	var servicos []map[string]interface{}
+
+	logger.GravarLog("ListServicesThreeYears: Iniciando busca de serviços de 3 anos")
+	// Executar a consulta fixa
+	query := `
+		SELECT COUNT(1) AS quantidade, EXTRACT(YEAR FROM created_at) AS ano, EXTRACT(MONTH FROM created_at) AS mes
+		FROM servicos s
+		WHERE EXTRACT(YEAR FROM created_at) IN (EXTRACT(YEAR FROM CURRENT_DATE), EXTRACT(YEAR FROM CURRENT_DATE) - 1, EXTRACT(YEAR FROM CURRENT_DATE) - 2)
+		GROUP BY EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at)
+	`
+	if err := database.DB.Raw(query).Find(&servicos).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao buscar serviços",
+		})
+		logger.GravarLog("ListServicesThreeYears: Erro ao buscar serviços")
+		return
+	}
+
+	logger.GravarLog("ListServicesThreeYears: Serviços localizados com sucesso")
 	c.JSON(http.StatusOK, servicos)
 }
