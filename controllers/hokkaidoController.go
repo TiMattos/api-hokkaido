@@ -520,3 +520,40 @@ func ListServicesThreeYears(c *gin.Context) {
 	logger.GravarLog("ListServicesThreeYears: Serviços localizados com sucesso")
 	c.JSON(http.StatusOK, servicos)
 }
+
+func ListServicesWeek(c *gin.Context) {
+	var servicos []map[string]interface{}
+
+	// Obtém o fuso horário de Brasília.
+	local, err := time.LoadLocation("America/Sao_Paulo")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao obter fuso horário de Brasília",
+		})
+		return
+	}
+
+	logger.GravarLog("ListServicesSixDays: Iniciando busca de serviços dos últimos 6 dias")
+
+	// Converte a data atual para a data local de Brasília.
+	dataLocal := time.Now().In(local).Format("2006-01-02")
+
+	// Executar a consulta para os últimos 6 dias
+	query := `
+        SELECT COUNT(1) AS quantidade, DATE(created_at) AS data
+        FROM servicos s
+        WHERE created_at >= ?::timestamp - INTERVAL '6 days'
+        GROUP BY DATE(created_at)
+        ORDER BY DATE(created_at) ASC
+    `
+	if err := database.DB.Raw(query, dataLocal).Find(&servicos).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao buscar serviços",
+		})
+		logger.GravarLog("ListServicesSixDays: Erro ao buscar serviços")
+		return
+	}
+
+	logger.GravarLog("ListServicesSixDays: Serviços localizados com sucesso")
+	c.JSON(http.StatusOK, servicos)
+}

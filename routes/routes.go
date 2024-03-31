@@ -26,6 +26,7 @@ func HandleRequests() {
 	authGroup.GET("/cliente/emails", controllers.ListEmailableClients)
 	authGroup.GET("/servicos/daily", controllers.ListDailyServices)
 	authGroup.GET("/servicos/years", controllers.ListServicesThreeYears)
+	authGroup.GET("/servicos/week", controllers.ListServicesWeek)
 	r.Run()
 
 }
