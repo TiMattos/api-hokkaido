@@ -303,25 +303,39 @@ func ListVeiculos(c *gin.Context, id int) []models.Veiculo {
 
 func HealthCheck(c *gin.Context) {
 	db, err := database.DB.DB()
-	logger.GravarLog("HealthCheck: Iniciando verificação de saúde do banco de dados")
+
+	// Obtém o fuso horário de Brasília.
+	local, err := time.LoadLocation("America/Sao_Paulo")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao obter fuso horário de Brasília",
+		})
+		return
+	}
+
+	// Converte a data GMT para a data local de Brasília.
+	dataLocal := time.Now().In(local).Format("2006-01-02T15:04:05Z")
+
+	logger.GravarLog("HealthCheck: Iniciando verificação de saúde do banco de dados (" + dataLocal + ")")
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"error": "Erro ao obter o objeto de banco de dados",
 		})
 		return
 	}
-	logger.GravarLog("HealthCheck: Verificando conexão com o banco de dados")
+	logger.GravarLog("HealthCheck: Verificando conexão com o banco de dados (" + dataLocal + ")")
 	if err := db.Ping(); err != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"error": "Falha na conexão com o banco de dados",
 		})
-		logger.GravarLog("HealthCheck: Falha na conexão com o banco de dados")
+		logger.GravarLog("HealthCheck: Falha na conexão com o banco de dados (" + dataLocal + ")")
 		return
 	}
-	logger.GravarLog("HealthCheck: Banco de dados está saudável")
+	logger.GravarLog("HealthCheck: Banco de dados está saudável (" + dataLocal + ")")
 
 	c.JSON(http.StatusOK, gin.H{
 		"status": "OK",
+		"data":   dataLocal,
 	})
 }
 
@@ -457,9 +471,22 @@ func ListEmailableClients(c *gin.Context) {
 func ListDailyServices(c *gin.Context) {
 	var servicos []models.Servico
 
-	logger.GravarLog("ListDailyServices: Iniciando busca de serviços diários")
+	// Obtém o fuso horário de Brasília.
+	local, err := time.LoadLocation("America/Sao_Paulo")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Erro ao obter fuso horário de Brasília",
+		})
+		return
+	}
+
+	// Converte a data GMT para a data local de Brasília.
+	dataLocal := time.Now().In(local).Format("2006-01-02")
+
+	logger.GravarLog("ListDailyServices: Iniciando busca de serviços diários (" + dataLocal + ")")
+
 	// Construir a consulta SQL para comparar a data truncada com a data no banco de dados
-	if err := database.DB.Where("DATE_TRUNC('day', created_at) = CURRENT_DATE").Find(&servicos).Error; err != nil {
+	if err := database.DB.Where("created_at::date = ?", dataLocal).Find(&servicos).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Erro ao buscar serviços",
 		})
